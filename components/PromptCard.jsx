@@ -9,18 +9,30 @@ const PromptCard = ({post, handleTagClick, handleEdit, handleDelete}) => {
   const pathName = usePathname();
   const router = useRouter();
   const [ copied, setCopied ] = useState("");
+
+  // function to copy to clipboard
   const handleCopy = () => {
     setCopied(post.prompt);
     navigator.clipboard.writeText(post.prompt);
     setTimeout(() => setCopied(""), 3000);
-
   }
+
+  // function to view other user's profiles
+  const handleProfileClick = () => {
+    // if user clicks on their profile redirect to their profile
+    if (post.creator._id === session?.user.id) return router.push("/profile");
+    // else if user clicks on another user profile redirect to that user's profile
+    router.push(`/profile/${post.creator._id}?name=${post.creator.username}`); 
+  };
 
 
   return (
     <div className='prompt_card'>
       <div className='flex justify-between items-start gap-5'>
-        <div className='flex-1 flex justify-start items-center gap-3 cursor-pointer'>
+        <div 
+          className='flex-1 flex justify-start items-center gap-3 cursor-pointer'
+          onClick={handleProfileClick}
+        >
           <Image
             src={post.creator.image}
             alt='user_image'
@@ -47,7 +59,7 @@ const PromptCard = ({post, handleTagClick, handleEdit, handleDelete}) => {
         </div>
       </div>
       <p className='my-4 font-satoshi text-sm text-gray-700'> {post.prompt} </p>
-      <p className='font-inter text-sm blue_gradient cursor-pointer' onClick={() => handleTagClick && handleTagClick}> {post.tag} </p>
+      <p className='font-inter text-sm blue_gradient cursor-pointer' onClick={() => handleTagClick && handleTagClick(post.tag)}>#{post.tag}</p>
       {session?.user.id === post.creator._id && pathName === '/profile' && (
         <div className='mt-5 flex-center gap-4 border-t border-gray-200 pt-3'>
           <p className='font-inter text-sm green_gradient cursor-pointer' onClick={handleEdit}>Edit</p>
