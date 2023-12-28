@@ -1,15 +1,15 @@
-import { connectToDB } from "@utils/database";
 import Prompt from "@models/prompt";
+import { connectToDB } from "@utils/database";
 
 // GET REQUEST (READ DATA)
 export const GET = async (request, { params }) => {
     try {
         await connectToDB();
 
-        const prompts = await Prompt.findById(params.id).populate('creator');
+        const prompt = await Prompt.findById(params.id).populate('creator');
         if(!prompt) return new Response("Post not found", { status: 404 })
 
-        return new Response(JSON.stringify(prompts), {
+        return new Response(JSON.stringify(prompt), {
             status: 200
         })
     } catch (error) {
@@ -25,10 +25,18 @@ export const PATCH = async (request, { params }) => {
     try{
         await connectToDB();
 
+        // find post by id
         const existingPrompt = await Prompt.findById(params.id);
-        if(!existingPrompt) return new Response("Prompt not found", {status: 404})
+
+        if (!existingPrompt) {
+            return new Response("Prompt not found", { status: 404 });
+        }
+
+        //update the post with new data
         existingPrompt.prompt = prompt;
         existingPrompt.tag = tag;
+
+        // await data to be saved
         await existingPrompt.save();
 
         return new Response(JSON.stringify (existingPrompt), {status: 200})
